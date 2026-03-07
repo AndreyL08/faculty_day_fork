@@ -1,45 +1,54 @@
 package ru.tbank.education.school.lesson2.bank
 
+
 class Bank {
-    // для создания уникального id
-    var accountSeq = 1
-    var clientSeq = 1
+    private var accountSeq = 1
+    private var clientSeq = 1
 
     private val clients: MutableList<Client> = mutableListOf()
     private val accounts: MutableList<Account> = mutableListOf()
 
     fun addClient(clientFullName: String) {
-        val newClient = Client(
-            // конструкция ${clientSeq} позволяет подставлять значения прямо в строку
-            "C-${clientSeq}",
-             clientFullName
-        )
-        clientSeq++
+        val newClient = Client("C-${clientSeq++}", clientFullName)
         clients.add(newClient)
     }
 
-    fun addAccount(clientId: String) {
-        val newAccount = Account(
-            id = "A-${accountSeq}",
+    fun addCheckingAccount(clientId: String) {
+        val newAccount = CheckingAccount(
+            id = "A-${accountSeq++}",
             balance = 0.0,
             customerId = clientId
         )
+        accounts.add(newAccount)
+    }
 
-        accountSeq++
+    fun addCreditAccount(clientId: String, creditLimit: Double, interestRate: Double) {
+        val newAccount = CreditAccount(
+            id = "A-${accountSeq++}",
+            balance = 0.0,
+            customerId = clientId,
+            creditLimit = creditLimit,
+            interestRate = interestRate
+
+        )
+        accounts.add(newAccount)
+    }
+
+    fun addSavingAccount(clientId: String, interestRate: Double) {
+        val newAccount = SavingAccount(
+            id = "A-${accountSeq++}",
+            balance = 0.0,
+            customerId = clientId,
+            interestRate = interestRate
+        )
         accounts.add(newAccount)
     }
 
     fun transfer(fromAccountId: String, toAccountId: String, amount: Double) {
-        // find может вернуть null
-        // !! выбрасывает ошибку если значение null
         val fromAccount = accounts.find { it.id == fromAccountId }!!
         val toAccount = accounts.find { it.id == toAccountId }!!
 
-        val ok = fromAccount.withdraw(amount)
-
-        if (ok) {
-            toAccount.deposit(amount)
-        }
+        if (fromAccount.withdraw(amount)) toAccount.deposit(amount)
     }
 
 }
