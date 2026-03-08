@@ -29,6 +29,7 @@ fun task() {
             )
         )
     )
+    for (user in users) user.orders.forEach { println(it) }
 }
 
 
@@ -36,6 +37,10 @@ fun task() {
 fun task2() {
     val months = listOf("Янв", "Фев", "Мар", "Апр", "Май")
     val revenue = listOf(1000, 1200, 800, 1400, 1300)
+
+    months.zip(revenue).forEach {
+        (month, revenue) -> println("$month - $revenue")
+    }
 }
 
 // Задание 3 - выведите id всех заказов, которые были доставлены и оплачены на сумму > 1000
@@ -46,6 +51,8 @@ fun task3() {
         Order(id = 3, product = "Рюкзак", amount = 1000, isPaid = true, isDelivered = true),
         Order(id = 4, product = "Кружка", amount = 500, isPaid = false, isDelivered = false)
     )
+    val filtered = orders.filter{ it.amount > 1000 && it.isDelivered && it.isPaid }
+    for (order in filtered) println(order.id)
 }
 
 
@@ -64,6 +71,13 @@ fun task4() {
         Student(name = "Галина", group = "A-03"),
         Student(name = "Денис", group = "A-02")
     )
+
+    val grouped = students.groupBy { it.group }
+    for ((group, students) in grouped) {
+        print("$group: ")
+        for (student in students) print("${student.name} ")
+        println()
+    }
 }
 
 data class ApiResponse(val code: Int, val message: String)
@@ -77,6 +91,8 @@ fun task5() {
         ApiResponse(code = 200, message = "Cached OK")
     )
 
+    val firstOk = responses.first{ it.code == 200 }
+    val lastError = responses.last{ it.code == 500 }
 }
 
 data class Movie(val title: String, val rating: Double)
@@ -90,32 +106,100 @@ fun task6() {
         Movie(title = "Тёмный рыцарь", rating = 9.1),
         Movie(title = "Мементо", rating = 8.5)
     )
+
+    val sorted = movies
+        .sortedByDescending{ it.rating }
+        .take(3)
 }
 
 // Задание 7 - добавить логирование операций
+fun logOperation(
+    name: String,
+    op: (Int, Int) -> Int
+): (Int, Int) -> Int = { a, b ->
+    println("== $name ==")
+    println("Input: a = $a, b = $b")
+    val result = op(a, b)
+    println("Output: $result")
+    println()
+    result
+}
+
 fun task7() {
     val add: (a: Int, b: Int) -> Int = { a, b -> a + b }
     val subtract: (a: Int, b: Int) -> Int = { a, b -> a - b }
     val multiply: (a: Int, b: Int) -> Int = { a, b -> a * b }
+    val loggedAdd = logOperation("Сложение", add)
+    val loggedSub = logOperation("Вычитание", subtract)
+    val loggedMul = logOperation("Умножение", multiply)
+    loggedAdd(2, 3)
+    loggedSub(10, 4)
+    loggedMul(3, 5)
 }
 
-
+// Задание 8 - хочу написать функции для валидации полей
 data class Client(
     val name: String,
     val email: String,
     val phone: String,
 )
 
-
 fun <A, B, C> ((A) -> B).andThen(next: (B) -> C): (A) -> C = { a -> next(this(a)) }
 
-// Задание 8 - хочу написать функции для валидации полей
+val trim: (String) -> String = String::trim
+val collapseSpaces: (String) -> String = { it.replace("\\s+".toRegex(), " ") }
+val toTitleCase: (String) -> String = { s ->
+    s.lowercase()
+        .split(' ')
+        .filter { it.isNotBlank() }
+        .joinToString(" ") { part ->
+            part.replaceFirstChar { ch -> ch.titlecase() }
+        }
+}
+
+val normalizeName = trim
+    .andThen(collapseSpaces)
+    .andThen(toTitleCase)
+
+val normalizeEmail = trim
+    .andThen(String::lowercase)
+
+val stripNonDigits: (String) -> String = { it.filter(Char::isDigit) }
+
+val normalizePhone = trim
+    .andThen(stripNonDigits)
+    .andThen { digits ->
+        when {
+            digits.length == 11 && digits.startsWith("8") -> "+7" + digits.drop(1)
+            digits.length == 11 && digits.startsWith("7") -> "+7" + digits.drop(1)
+            digits.length == 10 && digits.startsWith("9") -> "+7$digits"
+            else -> digits
+        }
+    }
+
+fun validateClient(raw: Client): Client? {
+    val name = normalizeName(raw.name)
+    if (name.isBlank()) return null
+
+    val email = normalizeEmail(raw.email)
+    if (!email.contains("@") || !email.contains(".")) return null
+
+    val phone = normalizePhone(raw.phone)
+    if (!phone.startsWith("+7") || phone.length != 12) return null
+
+    return Client(name, email, phone)
+}
+
 fun task8() {
     val rawClients = listOf(
         Client(name = "  Иван  ", email = "  IVAN@MAIL.RU  ", phone = " +7 (999) 123-45-67 "),
         Client(name = "  Мария  ", email = "maria@mail.ru", phone = "8-800-555-35-35"),
         Client(name = " ", email = "test@", phone = "000"),
     )
+
+    val validClients = rawClients.mapNotNull(::validateClient)
+
+    validClients.forEach(::println)
 }
 
 // Задание 9 - просто смотрим на примеры
@@ -147,7 +231,25 @@ fun task9() {
 }
 
 // Задание 10 - напишите функцию деления с использованием runCatching и Result<T>, реализуйте вывод ошибки и реузльтата
+fun safeDivide(a: Double, b: Double): Result<Double> =
+    runCatching {
+        require(b != 0.0) { "деление на ноль" }
+        a / b
+    }
+
 fun task10() {
+    val result1 = safeDivide(10.0, 2.0)
+    val result2 = safeDivide(10.0, 0.0)
+
+    listOf(result1, result2).forEach { result ->
+        result
+            .onSuccess { value -> println("Output: $value") }
+            .onFailure { error -> println("Error: ${error.message}") }
+    }
+}
+
+fun main() {
+    task10()
 }
 
 // Задание 11 - пример
@@ -185,8 +287,4 @@ interface Function1<in P1, out R> {
 // 2 параметра
 interface Function2<in P1, in P2, out R> {
     fun invoke(p1: P1, p2: P2): R
-}
-
-
-fun main() {
 }
