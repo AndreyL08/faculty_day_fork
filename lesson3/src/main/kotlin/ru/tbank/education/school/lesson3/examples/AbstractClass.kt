@@ -1,6 +1,6 @@
 // Абстрактный базовый класс
 abstract class FileProcessor(
-    val filePath: String
+    val filePath: String,
     var data: String
 ) {
 
@@ -17,5 +17,3 @@ abstract class FileProcessor(
     abstract fun processData()
 }
 
-class CsvFileProcessor(filePath: String) : FileProcessor(filePath)
-class YamlFileProcessor(filePath: String) : FileProcessor(filePath)

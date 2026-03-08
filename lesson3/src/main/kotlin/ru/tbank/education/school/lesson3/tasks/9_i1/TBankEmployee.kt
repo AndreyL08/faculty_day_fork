@@ -1,30 +1,41 @@
-interface TBankEmployee{
+interface CodeWriter {
     fun writeCode()
+}
+
+interface ProductionDeployer {
     fun deployToProduction()
+}
+
+interface ClientSupport {
     fun answerClientCall()
+}
+
+interface LoanProcessor {
     fun processLoanRequest()
 }
 
-// каждый из этих классов должен реализовать ВСЕ методы интерфейса
-class Developer(name: String) : TBankEmployee
-class SupportOperator(name: String) : TBankEmployee
-class LoanManager(name: String) : TBankEmployee
+class Developer(private val name: String) : CodeWriter, ProductionDeployer {
+    override fun writeCode() = println("$name пишет код")
+    override fun deployToProduction() = println("$name деплоит в прод")
+}
+
+class SupportOperator(private val name: String) : ClientSupport {
+    override fun answerClientCall() = println("$name отвечает на звонок клиента")
+}
+
+class LoanManager(private val name: String) : LoanProcessor {
+    override fun processLoanRequest() = println("$name обрабатывает заявку на кредит")
+}
 
 fun main() {
     val dev = Developer("Алексей")
     val support = SupportOperator("Мария")
     val loanManager = LoanManager("Игорь")
 
-    // В реальности:
-    // - разработчик не должен рассматривать кредиты
-    // - оператор поддержки не должен деплоить в прод
-    // - кредитный менеджер не должен писать код, и т.д.
     dev.writeCode()
-    dev.processLoanRequest()
+    dev.deployToProduction()
 
     support.answerClientCall()
-    support.deployToProduction()
 
     loanManager.processLoanRequest()
-    loanManager.writeCode()
 }

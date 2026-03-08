@@ -1,19 +1,21 @@
-class StudentProfile(
+data class StudentProfile(
     var name: String,
     var birthYear: Int,
     var className: String
 ) {
-    fun calculateAge(currentYear: Int): Int {
-        return currentYear - birthYear
-    }
+    fun calculateAge(currentYear: Int): Int = currentYear - birthYear
+}
 
-    fun printStudentInfo(currentYear: Int) {
-        println("Имя: $name")
-        println("Класс: $className")
-        println("Возраст: ${calculateAge(currentYear)}")
+class StudentInfoPrinter {
+    fun printStudentInfo(profile: StudentProfile, currentYear: Int) {
+        println("Имя: ${profile.name}")
+        println("Класс: ${profile.className}")
+        println("Возраст: ${profile.calculateAge(currentYear)}")
     }
+}
 
-    fun saveToFile(filename: String) {
+class StudentProfileSaver {
+    fun saveToFile(profile: StudentProfile, filename: String) {
         // сохраняем данные в файл
     }
 }

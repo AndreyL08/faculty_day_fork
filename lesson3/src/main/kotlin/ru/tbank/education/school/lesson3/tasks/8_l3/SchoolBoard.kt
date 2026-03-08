@@ -28,7 +28,7 @@ class PermanentBoard(
 ) : SchoolBoard(room) {
 
     override fun erase() {
-        throw IllegalStateException("[$room] Это несмываемая доска, стирать нельзя!")
+        // no-op
     }
 }
 
@@ -49,5 +49,5 @@ fun main() {
     usual.show()
     permanent.show()
 
-    cleanAllBoards(listOf(usual, permanent)) // здесь всё ломается
+    cleanAllBoards(listOf(usual, permanent))
 }

@@ -2,7 +2,8 @@ open class HomeworkSubmission(
     val studentName: String,
     var content: String
 ) {
-    // Считаем, что работу можно отправлять заново: новая версия заменяет старую
+    open val canResubmit: Boolean = true
+
     open fun resubmit(newContent: String) {
         content = newContent
         println("Ученик $studentName отправил новую версию работы")
@@ -14,15 +15,17 @@ class FinalExamSubmission(
     content: String
 ) : HomeworkSubmission(studentName, content) {
 
+    override val canResubmit: Boolean = false
+
     override fun resubmit(newContent: String) {
-        // Итоговую работу пересдавать нельзя
-        throw IllegalStateException("Итоговую работу ученика $studentName нельзя пересдать")
+        // no-op
     }
 }
 
 fun allowFixes(submission: HomeworkSubmission) {
-    // Учитель позволяет ученику подправить решение и пересдать
-    submission.resubmit(submission.content + "\n// исправлено по замечаниям")
+    if (submission.canResubmit) {
+        submission.resubmit(submission.content + "\n// исправлено по замечаниям")
+    }
 }
 
 fun main() {
@@ -30,5 +33,5 @@ fun main() {
     val final = FinalExamSubmission("Боря", "Итоговая контрольная работа")
 
     allowFixes(draft)
-    allowFixes(final) // тут всё ломается
+    allowFixes(final)
 }

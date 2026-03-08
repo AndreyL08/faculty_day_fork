@@ -17,13 +17,6 @@ class OnlineTrainingSession(
 ) : TrainingSession(title, room = "NO_ROOM") {
 
     override fun start() {
-        // Онлайн-тренинг не может начаться "в комнате"
-        throw IllegalStateException(
-            "Онлайн-тренинг \"$title\" не может начаться в комнате $room. Используйте ссылку $url"
-        )
-    }
-
-    fun startOnline() {
         println("Онлайн-тренинг \"$title\" начался по ссылке $url")
     }
 }
